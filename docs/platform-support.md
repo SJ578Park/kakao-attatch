@@ -9,8 +9,8 @@
 ```text
 확인일: 2026-06-03
 검증 호스트:
-  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+  - 검증 장비 A: Intel Mac x86_64, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - 재현 장비 B: KakaoTalk for Mac 26.4.1 build 1181, 동일 direct DB read workflow 재현 기록 있음
 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
 텍스트 확인: NTChatRoom / NTChatMessage read-only query
 첨부 확인: NTChatMessage.attachment JSON + fresh URL download attempt
@@ -28,7 +28,7 @@ UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 - 첨부 URL 만료 시간과 HTTP 응답 정책
 - macOS Accessibility 동작
 
-따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다.
+따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다. 특히 기본 검증은 Intel Mac에서 수행했으므로, Apple Silicon Mac에서는 같은 명령이 동작하더라도 별도 기록을 남기는 것이 좋습니다.
 
 ## macOS
 
@@ -83,7 +83,7 @@ KakaoTalk 업데이트 후에는 아래를 다시 확인합니다.
 
 ## English Summary
 
-The verified baseline is KakaoTalk for Mac 26.1.4 build 1163 on Ghost-Pearl and 26.4.1 build 1181 on Silver-Pearl as of 2026-06-03. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
+The primary verified baseline is an Intel Mac x86_64 device running macOS 13.7.8 and KakaoTalk for Mac 26.1.4 build 1163. The same direct DB read workflow is recorded as reproduced on another Mac with KakaoTalk for Mac 26.4.1 build 1181. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
 
 KakaoTalk updates may change DB paths, key derivation, table names, columns, attachment JSON shape, URL expiry behavior, or Accessibility behavior. Revalidate before claiming support on another KakaoTalk version.
 

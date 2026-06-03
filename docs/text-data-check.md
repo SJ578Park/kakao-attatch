@@ -7,13 +7,13 @@
 ```text
 확인일: 2026-06-03
 검증 호스트:
-  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+  - 검증 장비 A: Intel Mac x86_64, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - 재현 장비 B: KakaoTalk for Mac 26.4.1 build 1181, 동일 direct DB read workflow 재현 기록 있음
 수집 도구: kakaocli 0.4.1
 DB 접근: local SQLCipher DB read-only query
 ```
 
-이 버전 기준으로는 `kakaocli`가 `~/.kakaocli/config.json`의 `databasePath`, `key`를 사용해 KakaoTalk for Mac 로컬 DB를 읽는 방식이 동작합니다.
+이 버전 기준으로는 `kakaocli`가 `~/.kakaocli/config.json`의 `databasePath`, `key`를 사용해 KakaoTalk for Mac 로컬 DB를 읽는 방식이 동작합니다. 기본 검증 장비는 Intel Mac입니다.
 
 ## 사전 조건
 

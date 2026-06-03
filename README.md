@@ -22,8 +22,8 @@ public 상태에서 지켜야 할 기준:
 ```text
 확인일: 2026-06-03
 검증 호스트:
-  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+  - 검증 장비 A: Intel Mac x86_64, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - 재현 장비 B: KakaoTalk for Mac 26.4.1 build 1181, 동일 direct DB read workflow 재현 기록 있음
 수집 방식: kakaocli 0.4.1 direct SQLCipher DB read
 텍스트 확인: NTChatRoom / NTChatMessage read-only query
 첨부파일 확인: NTChatMessage.attachment JSON + fresh URL download attempt
@@ -32,7 +32,7 @@ Windows: 미검증
 Mobile KakaoTalk: 범위 밖
 ```
 
-카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다.
+기본 검증은 Intel Mac 환경에서 수행했습니다. 카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다.
 
 ## 핵심 방식
 
@@ -112,6 +112,7 @@ This repository is a documentation-first OpenClaw/Codex skill package for archiv
 Verified baseline as of 2026-06-03:
 
 - macOS 13.7.8
+- Intel Mac x86_64 baseline device
 - KakaoTalk for Mac 26.1.4 build 1163 and 26.4.1 build 1181
 - `kakaocli 0.4.1` direct SQLCipher DB reads
 - `kmsg 0.3.0` for UI send/read assistance only
