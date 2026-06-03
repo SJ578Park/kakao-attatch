@@ -1,33 +1,35 @@
-# Attachment Collection
+# 첨부파일 수집 방법
 
-## 현재 확인된 내용
+## 현재 확인 내용
 
-KakaoTalk message row에는 attachment metadata가 포함될 수 있습니다. selected chat에 대해서는 collector가 다음을 보존할 수 있습니다.
+KakaoTalk 메시지 row에는 첨부파일 메타데이터가 들어 있습니다. 선택한 채팅방에 대해 collector는 아래 정보를 보존할 수 있습니다.
 
-- message row identity
-- attachment JSON
-- filename or key hints
+- 메시지 식별자
+- `attachment` JSON
+- 파일명 또는 key hint
 - MIME type
-- size
-- width/height
-- expiry-like timestamps
-- `localFilePath` when present
+- 크기
+- 이미지/영상 width, height
+- 만료값으로 보이는 timestamp
+- `localFilePath`가 있을 때의 로컬 파일 경로
 
-기존 local probe 기준으로 `localFilePath`는 자주 비어 있었고, 이미 로컬에 존재하는 파일에만 유용한 경우가 많았습니다.
+다만 `localFilePath`는 관측상 매우 드물고, 주로 로컬에서 보낸 파일이나 이미 로컬에 존재하는 파일에만 의미가 있습니다. 첨부파일 보존의 핵심은 **새 첨부 URL이 만료되기 전에 주기적으로 확인하고 저장을 시도하는 것**입니다.
 
-fresh attachment URL은 짧은 기간 동안 사용할 수 있습니다. 2026-05-21 local probe에서 신규 이미지와 spreadsheet 첨부는 DB `attachment.url`로 HTTP 200 다운로드가 가능했습니다. 오래된 sample URL은 HTTP 410을 반환했습니다.
+## 확인된 기준 환경
 
-실무 규칙:
+```text
+확인일: 2026-06-03
+호스트 OS: macOS 13.7.8
+KakaoTalk for Mac: 26.1.4
+이전 첨부 probe: 2026-05-21
+결과: 새 이미지/스프레드시트 URL은 HTTP 200, 오래된 URL은 HTTP 410 사례 확인
+```
 
-- fresh 첨부는 빠르게 수집합니다.
-- HTTP status를 기록합니다.
-- HTTP 410은 fatal error가 아니라 정상 만료로 취급합니다.
-- 장기 보존을 remote URL에만 의존하지 않습니다.
-- raw URL은 로그나 GitHub에 남기지 않습니다.
+HTTP 410은 “이미 만료됨”으로 취급합니다. fatal error가 아니라 정상적인 만료 결과로 기록합니다.
 
-## n시간 주기
+## n시간 주기 설정
 
-설정은 다음 값을 노출합니다.
+config에는 아래처럼 표현합니다.
 
 ```json
 {
@@ -39,42 +41,69 @@ fresh attachment URL은 짧은 기간 동안 사용할 수 있습니다. 2026-05
 }
 ```
 
-`intervalHours`가 n시간 주기입니다.
+권장값:
 
-- `1`: 매시간 실행
-- `3`: 3시간마다 실행
-- `6`: 하루 4회 실행
-- `24`: 일 1회 archival pass
+- 중요한/활성 채팅방: `1`
+- 일반 채팅방: `3`
+- 낮은 우선순위 채팅방: `6` 또는 `12`
+- 일 1회(`24`)는 오래된 첨부파일을 놓칠 가능성이 큽니다.
 
-active room은 `1` 또는 `3`을 권장합니다. 일 1회 수집은 첨부파일 만료를 놓칠 수 있습니다.
+## 수집 순서
 
-## 수집 전략
+1. 선택 채팅방의 새 메시지를 DB에서 조회합니다.
+2. `NTChatMessage.attachment`를 JSON으로 파싱합니다.
+3. `localFilePath`가 있고 읽을 수 있으면 먼저 복사합니다.
+4. fresh `attachment.url` 또는 이미지 목록 URL을 즉시 다운로드 시도합니다.
+5. 성공 시 ignored media directory에 저장합니다.
+6. 실패 시 HTTP status만 기록합니다.
+7. raw URL과 원문 메시지는 로그에 남기지 않습니다.
 
-권장 순서:
+## 첨부 type별 주요 필드
 
-1. `localFilePath`: KakaoTalk이 readable local path를 기록했다면 파일을 복사합니다.
-2. `remoteUrlFresh`: 신규 row의 DB attachment URL을 즉시 시도하고 HTTP status를 기록합니다.
-3. `filesystemWatcher`: KakaoTalk cache/download folder의 신규 파일을 감시해 복사합니다.
-4. `uiBackfill`: 오래된 selected media에 한해 manual/assisted path로 보완합니다.
+사진(type `2`)에서 자주 보이는 필드:
+
+```text
+url, thumbnailUrl, k, mt, s, w, h, expire
+```
+
+영상(type `3`)에서 자주 보이는 필드:
+
+```text
+url, tk, s, d, w, h, expire
+```
+
+파일(type `18`)에서 자주 보이는 필드:
+
+```text
+name, url, k, s, size, expire, cs
+```
+
+멀티 이미지(type `27`)에서 자주 보이는 필드:
+
+```text
+imageUrls, thumbnailUrls, kl, mtl, sl, expire
+```
+
+카카오톡 버전에 따라 필드가 바뀔 수 있으므로, collector는 모르는 필드를 버리지 말고 redacted raw JSON으로 로컬 archive에 보존하는 것이 좋습니다.
 
 ## 스케줄링
 
-macOS:
+macOS에서는 LaunchAgent를 권장합니다.
 
-- LaunchAgent가 user session app과 가장 잘 맞습니다.
-- 간단한 실험은 `cron`도 가능합니다.
+`intervalHours = 3`이면 LaunchAgent `StartInterval`은 아래처럼 10800초입니다.
 
-Windows:
+```xml
+<key>StartInterval</key>
+<integer>10800</integer>
+```
 
-- Windows adapter가 검증된 뒤 Task Scheduler를 고려합니다.
+간단한 실험에서는 cron도 가능합니다.
 
-Cross-platform:
+```cron
+0 */3 * * * cd /path/to/repo && /usr/bin/python3 scripts/sync_once.py --config config/archive.config.json
+```
 
-- long-running Node/Python process가 `intervalHours`마다 poll할 수 있지만, reboot 복구는 OS-native scheduling이 더 쉽습니다.
-
-## 공유 가능한 run log
-
-각 run은 다음 정도만 기록합니다.
+## run log에 남길 내용
 
 ```text
 started_at
@@ -87,10 +116,18 @@ download_failure_count
 failure_status_breakdown
 ```
 
-raw URL이나 message body는 로그에 남기지 않습니다.
+남기면 안 되는 내용:
 
----
+- raw attachment URL
+- 원문 메시지
+- SQLCipher key
+- 계정 hash가 들어간 전체 DB path
+- 다운로드된 실제 파일
 
-# English Summary
+## English Summary
 
-Attachment URLs are freshness-sensitive. In local testing on 2026-05-21, fresh image and spreadsheet attachment URLs returned HTTP 200, while older sampled URLs returned HTTP 410. Run attachment collection every 1-3 hours for active rooms, record HTTP status, and treat 410 as normal expiry.
+Attachment metadata is read from `NTChatMessage.attachment`. Fresh URLs may be downloadable for a short window, while older URLs can return HTTP 410. Run the attachment collector every 1-3 hours for active rooms.
+
+The verified baseline is macOS 13.7.8 and KakaoTalk for Mac 26.1.4 as of 2026-06-03. Attachment behavior was probed locally on 2026-05-21: fresh image/spreadsheet URLs returned HTTP 200, while older URLs returned HTTP 410.
+
+Do not log raw URLs, message bodies, SQLCipher keys, or account-specific paths.

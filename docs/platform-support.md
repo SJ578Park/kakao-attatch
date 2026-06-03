@@ -1,106 +1,90 @@
-# Platform Support
+# 동작 환경과 버전 지원
 
-## 요약
+## 현재 결론
 
-현재 구현은 macOS 전용으로 설명해야 합니다.
+현재 구현은 **macOS KakaoTalk for Mac 전용으로 검증**되어 있습니다.
 
-archive schema나 selected chat 정책은 나중에 cross-platform으로 확장할 수 있지만, 지금 검증된 DB 접근 경로는 KakaoTalk for Mac, `kakaocli`, SQLCipher, macOS container path, macOS 권한 모델에 의존합니다.
+검증 기준:
 
-## 검증된 환경
+```text
+확인일: 2026-06-03
+검증 호스트:
+  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
+텍스트 확인: NTChatRoom / NTChatMessage read-only query
+첨부 확인: NTChatMessage.attachment JSON + fresh URL download attempt
+UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
+```
 
-현재 확인된 조합:
+이 기능은 카카오톡 버전에 영향을 받을 수 있습니다. KakaoTalk for Mac이 업데이트되면 다음 요소가 바뀔 수 있습니다.
 
-- Ghost-Pearl
-  - macOS host
-  - KakaoTalk for Mac `26.1.4` build `1163`
-  - `~/.local/bin/kakaocli 0.4.1`
-  - `~/.local/bin/kmsg 0.3.0`
-  - `~/.kakaocli/config.json` 존재
-- Silver-Pearl
-  - macOS host
-  - KakaoTalk for Mac `26.4.1` build `1181`
-  - `kakaocli 0.4.1`
-  - `kmsg 0.3.0`
+- 로컬 DB 위치
+- SQLCipher key derivation 방식
+- DB 파일명
+- `NTChatRoom`, `NTChatMessage` 테이블 존재 여부
+- 메시지 컬럼명
+- `attachment` JSON 구조
+- 첨부 URL 만료 시간과 HTTP 응답 정책
+- macOS Accessibility 동작
 
-위 버전은 “동작 확인된 범위”이지 “앞으로 모든 카카오톡 버전에서 보장”을 뜻하지 않습니다.
+따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다.
 
-## macOS 동작 조건
+## macOS
 
 현재 경로:
 
-- `kakaocli`가 KakaoTalk for Mac의 로컬 SQLCipher DB를 read-only로 읽습니다.
+- `kakaocli`가 KakaoTalk for Mac 로컬 SQLCipher DB를 read-only로 읽습니다.
 - DB 경로와 key는 로컬 `~/.kakaocli/config.json`에서 읽습니다.
-- DB read에는 Full Disk Access가 필요할 수 있습니다.
-- `kmsg send/read` 같은 UI 기능은 macOS Accessibility permission이 필요합니다.
-- Ghost-Pearl처럼 `kakaocli`가 PATH에 없으면 `~/.local/bin/kakaocli` 절대경로를 사용합니다.
+- DB 읽기에는 Full Disk Access가 필요할 수 있습니다.
+- UI 기능(send/read/harvest 등)은 macOS Accessibility 권한에 의존합니다.
 
-KakaoTalk for Mac data area:
+알려진 KakaoTalk Mac 데이터 영역:
 
 ```text
 ~/Library/Containers/com.kakao.KakaoTalkMac/Data/Library/Application Support/com.kakao.KakaoTalkMac
 ~/Library/Containers/com.kakao.KakaoTalkMac/Data/Library/Caches
 ```
 
-## 버전 확인 방법
-
-```bash
-defaults read /Applications/KakaoTalk.app/Contents/Info CFBundleShortVersionString
-defaults read /Applications/KakaoTalk.app/Contents/Info CFBundleVersion
-mdls -name kMDItemVersion /Applications/KakaoTalk.app
-kakaocli --version
-kmsg --version
-```
-
-카카오톡 업데이트 후에는 다음을 다시 확인해야 합니다.
-
-1. `~/.kakaocli/config.json`의 `databasePath`가 존재하는지.
-2. `kakaocli query`가 read-only query를 실행하는지.
-3. `NTChatMessage`에서 text, sent timestamp, attachment JSON을 읽을 수 있는지.
-4. 신규 첨부파일 URL이 바로 다운로드 가능한지.
-5. 오래된 URL이 410 등으로 만료될 때 실패 상태가 정상 기록되는지.
+공개 문서에는 실제 계정 hash가 포함된 전체 경로를 쓰지 않습니다.
 
 ## Windows
 
-Windows support는 현재 구현에서 검증되지 않았습니다.
+Windows KakaoTalk PC는 아직 검증되지 않았습니다.
 
-공개 reference에는 KakaoTalk for Windows local data path가 아래처럼 언급되지만:
+공개 자료상 Windows 로컬 데이터 경로로 아래 형태가 언급되지만, 현재 macOS 구현이 Windows에서도 동작한다는 뜻은 아닙니다.
 
 ```text
 %LOCALAPPDATA%\Kakao\KakaoTalk\users\<hash>\
 ```
 
-현재 Mac 구현이 Windows에서도 동일하게 동작한다는 뜻은 아닙니다. Windows는 별도 probe가 필요합니다.
+Windows에서 별도로 확인해야 할 항목:
 
-- database filename derivation
-- SQLCipher key derivation
-- table names
-- attachment metadata shape
-- cache naming
-- UI automation path
+- DB 위치
+- 암호화/키 유도 방식
+- 테이블명과 컬럼명
+- 첨부 JSON 구조
+- cache/download 폴더 구조
+- Task Scheduler 기반 주기 실행
+- UI 자동화 가능 여부
 
-## 권장 구조
+## 버전 재검증 절차
 
-코드화할 때는 다음처럼 나눕니다.
+KakaoTalk 업데이트 후에는 아래를 다시 확인합니다.
 
-- `core`: normalized archive schema, selected chat policy, run logging
-- `adapters/macos-kakaocli`: current verified Mac collector
-- `adapters/windows-kakao`: future Windows probe
-- `media`: attachment downloader/cache watcher experiments
-- `rules`: future conditional reply engine
+1. KakaoTalk 앱 버전을 기록합니다.
+2. `~/.kakaocli/config.json`에 `databasePath`, `key`가 있는지 확인합니다.
+3. DB 파일이 존재하고 read-only query가 되는지 확인합니다.
+4. `NTChatRoom`에서 채팅방 목록을 조회합니다.
+5. 선택한 채팅방의 `NTChatMessage`를 조회합니다.
+6. 새 첨부파일을 하나 받아 `attachment` JSON 구조와 즉시 다운로드 가능 여부를 확인합니다.
+7. 결과는 pass/fail과 HTTP status count만 기록합니다.
+8. 원문 메시지, key, raw URL, 계정별 DB path는 기록하지 않습니다.
 
-Windows probe가 local test account에서 chat list와 selected message read를 확인하기 전까지 Windows 지원을 표시하지 않습니다.
+## English Summary
 
----
+The verified baseline is KakaoTalk for Mac 26.1.4 build 1163 on Ghost-Pearl and 26.4.1 build 1181 on Silver-Pearl as of 2026-06-03. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
 
-# English Summary
+KakaoTalk updates may change DB paths, key derivation, table names, columns, attachment JSON shape, URL expiry behavior, or Accessibility behavior. Revalidate before claiming support on another KakaoTalk version.
 
-Current support is macOS-only.
-
-Verified versions:
-
-- KakaoTalk for Mac `26.1.4` build `1163`
-- KakaoTalk for Mac `26.4.1` build `1181`
-- `kakaocli 0.4.1`
-- `kmsg 0.3.0`
-
-This does not guarantee future KakaoTalk versions. Revalidate DB path, SQLCipher access, table fields, attachment JSON, and fresh attachment URL behavior after every KakaoTalk update.
+Windows support is not verified.
