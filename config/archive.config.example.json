@@ -1,0 +1,35 @@
+{
+  "platform": "macos",
+  "selectedChats": [
+    {
+      "label": "example-group",
+      "matchType": "name",
+      "value": "Example Group Chat",
+      "enabled": true
+    }
+  ],
+  "paths": {
+    "archiveDb": "./data/archive.sqlite",
+    "mediaDir": "./data/media",
+    "runLogDir": "./logs"
+  },
+  "kakaocli": {
+    "configPath": "~/.kakaocli/config.json",
+    "binary": "kakaocli"
+  },
+  "attachmentCollection": {
+    "enabled": true,
+    "intervalHours": 3,
+    "maxItemsPerRun": 200,
+    "strategies": [
+      "localFilePath",
+      "remoteUrlFresh",
+      "filesystemWatcher"
+    ]
+  },
+  "replyAutomation": {
+    "enabled": false,
+    "mode": "draft-only",
+    "requireHumanConfirmation": true
+  }
+}

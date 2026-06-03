@@ -1,0 +1,13 @@
+data/
+logs/
+*.sqlite
+*.sqlite-*
+*.db
+*.edb
+*.log
+*.env
+archive.config.json
+local.config.json
+media/
+downloads/
+
