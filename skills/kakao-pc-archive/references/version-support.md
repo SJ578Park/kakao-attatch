@@ -8,8 +8,8 @@
 지원 수준: macOS verified, Windows unverified
 확인일: 2026-06-03
 검증 호스트:
-  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+  - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 KakaoTalk client: KakaoTalk for Mac
 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
 첨부 adapter: DB attachment JSON + fresh URL downloader + optional cache watcher
@@ -59,8 +59,8 @@ Notes: <redacted operational notes only>
 
 ## 호환성 매트릭스
 
-- Ghost-Pearl macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1`: 현재 검증 기준.
-- Silver-Pearl + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: 현재 확인된 앱/도구 기준.
+- Intel Mac x86_64 + Intel Core i5 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1`: 기본 검증 기준.
+- Apple Silicon Mac arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: 동일 read-only DB probe 재현 확인.
 - macOS + 다른 KakaoTalk for Mac 버전: 재검증 필요.
 - macOS + `kmsg`: UI send/read/reminder 자동화에 유용하지만 search focus, recent chat state에 취약할 수 있음.
 - Windows + KakaoTalk PC: 미검증. 별도 probe 필요.
@@ -90,7 +90,7 @@ Notes: <redacted operational notes only>
 
 ## English Summary
 
-Verified baselines: KakaoTalk for Mac 26.1.4 build 1163 and 26.4.1 build 1181 with `kakaocli 0.4.1`, checked on 2026-06-03.
+Verified baselines: Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 and Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181, both with `kakaocli 0.4.1`, checked on 2026-06-03.
 
 Any other KakaoTalk version requires revalidation because DB paths, key derivation, table/column names, attachment JSON shape, URL expiry behavior, and Accessibility behavior can change.
 

@@ -9,7 +9,8 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 ## 기본 경계
 
-- 검증된 경로: KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 + `kakaocli 0.4.1` direct DB read.
+- 기본 검증 경로: Intel Mac x86_64 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1` direct DB read.
+- 재현 확인 경로: Apple Silicon arm64 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1` direct DB read.
 - 텍스트 수집은 UI 자동화가 아니라 read-only DB 조회를 우선한다.
 - 첨부파일 보존은 시간 민감하다. 새 `attachment.url`이 만료되기 전에 빠르게 확인하고 HTTP status를 기록한다.
 - `kmsg`는 UI send/read/reminder 보조용이다. archive source of truth로 쓰지 않는다.
@@ -54,7 +55,7 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 ## English Summary
 
-Use this skill for selected KakaoTalk PC/Mac local archive workflows. The verified baselines are KakaoTalk for Mac 26.1.4 build 1163 and 26.4.1 build 1181 using `kakaocli 0.4.1` direct SQLCipher DB reads.
+Use this skill for selected KakaoTalk PC/Mac local archive workflows. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 using `kakaocli 0.4.1` direct SQLCipher DB reads. The same read-only DB probes were reproduced on Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181.
 
 Text collection should use read-only DB queries. Attachment preservation is freshness-sensitive; run every 1-3 hours for active rooms and record HTTP status without logging raw URLs.
 

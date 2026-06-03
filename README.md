@@ -22,8 +22,8 @@ public 상태에서 지켜야 할 기준:
 ```text
 확인일: 2026-06-03
 검증 호스트:
-  - Ghost-Pearl: macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Silver-Pearl: KakaoTalk for Mac 26.4.1 build 1181
+  - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+  - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 수집 방식: kakaocli 0.4.1 direct SQLCipher DB read
 텍스트 확인: NTChatRoom / NTChatMessage read-only query
 첨부파일 확인: NTChatMessage.attachment JSON + fresh URL download attempt
@@ -112,7 +112,8 @@ This repository is a documentation-first OpenClaw/Codex skill package for archiv
 Verified baseline as of 2026-06-03:
 
 - macOS 13.7.8
-- KakaoTalk for Mac 26.1.4 build 1163 and 26.4.1 build 1181
+- Intel Mac baseline: KakaoTalk for Mac 26.1.4 build 1163 on macOS 13.7.8
+- Apple Silicon reproduction: KakaoTalk for Mac 26.4.1 build 1181 on Apple M4
 - `kakaocli 0.4.1` direct SQLCipher DB reads
 - `kmsg 0.3.0` for UI send/read assistance only
 - text verification through read-only `NTChatRoom` / `NTChatMessage` queries
