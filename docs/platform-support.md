@@ -10,6 +10,7 @@
 확인일: 2026-06-03
 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+검증 대상:
   - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
 텍스트 확인: NTChatRoom / NTChatMessage read-only query
@@ -17,7 +18,7 @@
 UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 ```
 
-기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac에서는 동일한 read-only DB probe가 재현되는지 확인했습니다.
+기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac 26.4.1 build 1181은 자동 업데이트 환경이므로, 해당 장비에서 `scripts/probe_kakaotalk_env.py`가 통과한 뒤 confirmed로 기록해야 합니다.
 
 이 기능은 카카오톡 버전에 영향을 받을 수 있습니다. KakaoTalk for Mac이 업데이트되면 다음 요소가 바뀔 수 있습니다.
 
@@ -30,7 +31,7 @@ UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 - 첨부 URL 만료 시간과 HTTP 응답 정책
 - macOS Accessibility 동작
 
-따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다.
+따라서 **KakaoTalk for Mac 26.1.4 build 1163 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다. Apple Silicon Mac의 26.4.1 build 1181은 검증 대상이며, safe probe 통과 후 confirmed로 승격합니다.
 
 ## macOS
 
@@ -85,7 +86,7 @@ KakaoTalk 업데이트 후에는 아래를 다시 확인합니다.
 
 ## English Summary
 
-The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. The same read-only DB probes were reproduced on an Apple Silicon Mac (arm64, Apple M4) running KakaoTalk for Mac 26.4.1 build 1181. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
+The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon Mac (arm64, Apple M4) with KakaoTalk for Mac 26.4.1 build 1181 is a target validation environment and should be promoted to confirmed only after the safe probe passes on that machine. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
 
 KakaoTalk updates may change DB paths, key derivation, table names, columns, attachment JSON shape, URL expiry behavior, or Accessibility behavior. Revalidate before claiming support on another KakaoTalk version.
 

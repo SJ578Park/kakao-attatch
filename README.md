@@ -23,6 +23,7 @@ public 상태에서 지켜야 할 기준:
 확인일: 2026-06-03
 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+검증 대상:
   - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 수집 방식: kakaocli 0.4.1 direct SQLCipher DB read
 텍스트 확인: NTChatRoom / NTChatMessage read-only query
@@ -32,7 +33,7 @@ Windows: 미검증
 Mobile KakaoTalk: 범위 밖
 ```
 
-카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다.
+카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. Intel Mac 기준 환경 외에는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다. Apple Silicon Mac 26.4.1 build 1181은 `scripts/probe_kakaotalk_env.py` 통과 후 confirmed로 승격합니다.
 
 ## 핵심 방식
 
@@ -113,7 +114,7 @@ Verified baseline as of 2026-06-03:
 
 - macOS 13.7.8
 - Intel Mac baseline: KakaoTalk for Mac 26.1.4 build 1163 on macOS 13.7.8
-- Apple Silicon reproduction: KakaoTalk for Mac 26.4.1 build 1181 on Apple M4
+- Apple Silicon target to verify: KakaoTalk for Mac 26.4.1 build 1181 on Apple M4
 - `kakaocli 0.4.1` direct SQLCipher DB reads
 - `kmsg 0.3.0` for UI send/read assistance only
 - text verification through read-only `NTChatRoom` / `NTChatMessage` queries

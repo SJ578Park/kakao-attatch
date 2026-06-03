@@ -5,7 +5,7 @@
 - KakaoTalk for Mac 설치 및 로그인.
 - 검증된 KakaoTalk for Mac 버전:
   - Intel Mac x86_64: `26.1.4` build `1163`
-  - Apple Silicon arm64: `26.4.1` build `1181`
+  - Apple Silicon arm64 target validation: `26.4.1` build `1181`
 - `kakaocli 0.4.1` 설치.
 - `kmsg 0.3.0` 설치. 단, archive source가 아니라 UI send/read 용도.
 - `~/.kakaocli/config.json`:
@@ -136,4 +136,4 @@ LaunchAgent는 다음을 지켜야 합니다.
 
 # English Summary
 
-Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163; read-only DB behavior was reproduced on Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.
+Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163; Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181 should be confirmed by running the safe probe on that machine. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.

@@ -9,6 +9,7 @@
 확인일: 2026-06-03
 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+검증 대상:
   - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 KakaoTalk client: KakaoTalk for Mac
 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
@@ -17,7 +18,7 @@ UI automation: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 이전 첨부 동작 probe: 2026-05-21
 ```
 
-KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전은 “동작 가능성이 있음”으로만 보고, 직접 재검증 전에는 지원된다고 말하지 않는다.
+KakaoTalk for Mac 26.1.4 build 1163 외 버전은 “동작 가능성이 있음”으로만 보고, 직접 재검증 전에는 지원된다고 말하지 않는다. Apple Silicon Mac 26.4.1 build 1181은 safe probe 통과 후 confirmed로 승격한다.
 
 ## 버전 caveat
 
@@ -60,7 +61,7 @@ Notes: <redacted operational notes only>
 ## 호환성 매트릭스
 
 - Intel Mac x86_64 + Intel Core i5 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1`: 기본 검증 기준.
-- Apple Silicon Mac arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: 동일 read-only DB probe 재현 확인.
+- Apple Silicon Mac arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: safe probe 통과 후 confirmed로 승격.
 - macOS + 다른 KakaoTalk for Mac 버전: 재검증 필요.
 - macOS + `kmsg`: UI send/read/reminder 자동화에 유용하지만 search focus, recent chat state에 취약할 수 있음.
 - Windows + KakaoTalk PC: 미검증. 별도 probe 필요.
@@ -90,7 +91,7 @@ Notes: <redacted operational notes only>
 
 ## English Summary
 
-Verified baselines: Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 and Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181, both with `kakaocli 0.4.1`, checked on 2026-06-03.
+Verified baseline: Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 and `kakaocli 0.4.1`, checked on 2026-06-03. Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181 should be promoted to confirmed only after the safe probe passes on that machine.
 
 Any other KakaoTalk version requires revalidation because DB paths, key derivation, table/column names, attachment JSON shape, URL expiry behavior, and Accessibility behavior can change.
 

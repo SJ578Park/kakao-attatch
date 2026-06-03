@@ -49,7 +49,7 @@
 새 검증 결과가 없으면 아래 문구를 사용한다.
 
 ```text
-Intel Mac x86_64 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + kakaocli 0.4.1 direct SQLCipher DB read가 기본 검증 기준이고, Apple Silicon arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181에서도 동일한 read-only DB probe가 재현됐다.
+Intel Mac x86_64 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + kakaocli 0.4.1 direct SQLCipher DB read가 기본 검증 기준이다. Apple Silicon arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181은 해당 장비에서 safe probe 통과 후 confirmed로 승격한다.
 Windows KakaoTalk support는 research-only다.
 첨부파일 보존은 best-effort이며 URL 만료 전에 주기적으로 확인해야 한다.
 ```

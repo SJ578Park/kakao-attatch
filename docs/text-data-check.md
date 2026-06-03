@@ -8,6 +8,7 @@
 확인일: 2026-06-03
 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
+검증 대상:
   - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 수집 도구: kakaocli 0.4.1
 DB 접근: local SQLCipher DB read-only query
@@ -108,6 +109,6 @@ raw_url_logged: no
 
 ## English Summary
 
-Use `kakaocli 0.4.1` to read the KakaoTalk for Mac local SQLCipher database in read-only mode. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163; the same read-only DB probes were reproduced on Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181 as of 2026-06-03.
+Use `kakaocli 0.4.1` to read the KakaoTalk for Mac local SQLCipher database in read-only mode. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181 should be confirmed by running `scripts/probe_kakaotalk_env.py` on that machine.
 
 Before claiming support on another version, verify the KakaoTalk app version, local `kakaocli` config presence, `NTChatRoom` query, and selected `NTChatMessage` query. Do not log DB paths, keys, raw message bodies, or raw attachment URLs.
