@@ -1,100 +1,139 @@
 # macOS Operations
 
-## Required Local Pieces
+## 필요한 로컬 구성
 
-- KakaoTalk for Mac installed and logged in.
-- `kakaocli` installed.
-- SQLCipher support available through `kakaocli`.
-- `~/.kakaocli/config.json` with:
+- KakaoTalk for Mac 설치 및 로그인.
+- 검증된 KakaoTalk for Mac 버전:
+  - `26.1.4` build `1163`
+  - `26.4.1` build `1181`
+- `kakaocli 0.4.1` 설치.
+- `kmsg 0.3.0` 설치. 단, archive source가 아니라 UI send/read 용도.
+- `~/.kakaocli/config.json`:
   - `databasePath`
   - `key`
-- Full Disk Access for the process reading KakaoTalk container data.
-- Accessibility permission only when using UI actions such as `kmsg send/read`.
+- KakaoTalk container data를 읽는 process에 Full Disk Access 필요 가능.
+- `kmsg send/read` 같은 UI action에는 Accessibility permission 필요.
 
-## Known KakaoTalk Data Areas
+## KakaoTalk data area
 
 ```text
 ~/Library/Containers/com.kakao.KakaoTalkMac/Data/Library/Application Support/com.kakao.KakaoTalkMac
 ~/Library/Containers/com.kakao.KakaoTalkMac/Data/Library/Caches
 ```
 
-Do not commit full account-specific paths if they contain hashes or local usernames.
+계정 hash나 local username이 포함된 전체 경로는 commit하지 않습니다.
 
-## Safe Query Pattern
+## 안전한 query pattern
 
-Use explicit `--db` and `--key` values from local config. Do not log either value.
+local config에서 `--db`, `--key` 값을 읽어 명시적으로 전달합니다. 두 값은 로그에 남기지 않습니다.
 
 ```bash
 kakaocli query "<SQL>" --db "$databasePath" --key "$key"
 ```
 
-For agents, prefer a helper that:
+에이전트는 다음 성격의 helper를 선호합니다.
 
-- reads local config
-- redacts secrets from errors
-- times out bounded queries
-- parses JSON output
-- fails closed if selected chats are empty
+- local config를 읽습니다.
+- error에서 secret을 redaction합니다.
+- bounded query에 timeout을 겁니다.
+- JSON output을 parsing합니다.
+- selected chat이 비어 있으면 fail closed합니다.
 
-## Selected Chat Policy
+## 텍스트 데이터 확인
 
-Do not ingest all rooms by default.
+직접 확인용 read-only query 예시:
 
-Minimum workflow:
+```bash
+python3 - <<'PY'
+import json
+import pathlib
+import subprocess
 
-1. Probe chat metadata.
-2. Add selected rooms to `selected_chats`.
-3. Sync only rows where the chat is enabled.
-4. Keep raw archive output outside git.
-
-## Attachment Loop
-
-Recommended cadence for active rooms:
-
-```text
-every 1-3 hours
+cfg = json.loads((pathlib.Path.home() / ".kakaocli/config.json").read_text())
+sql = """
+select chatId, logId, authorId, type, message, attachment, sentAt
+from NTChatMessage
+order by sentAt desc
+limit 20
+"""
+binary = pathlib.Path.home() / ".local/bin/kakaocli"
+if not binary.exists():
+    binary = "kakaocli"
+cmd = [str(binary), "query", sql, "--db", cfg["databasePath"], "--key", cfg["key"]]
+p = subprocess.run(cmd, text=True, capture_output=True, timeout=30)
+if p.returncode != 0:
+    raise SystemExit(p.stderr or p.stdout)
+print(p.stdout)
+PY
 ```
 
-Per run:
+이 출력은 실제 메시지를 포함할 수 있으므로 공유하지 않습니다.
 
-1. Find new attachment candidates in selected chats.
-2. Copy `localFilePath` if readable.
-3. Try fresh `attachment.url` once or with a small retry budget.
-4. Store downloaded files under ignored `data/media` or another local-only path.
-5. Record HTTP status and size.
-6. Mark 410 as expired.
-7. Avoid logging message bodies and raw URLs.
+## selected chat policy
+
+모든 방을 기본 수집하지 않습니다.
+
+최소 workflow:
+
+1. chat metadata를 로컬에서만 probe합니다.
+2. selected room만 `selected_chats`에 넣습니다.
+3. enabled selected chat row만 sync합니다.
+4. raw archive output은 git 밖에 둡니다.
+
+## 첨부파일 loop
+
+active room 권장 주기:
+
+```text
+1-3시간마다
+```
+
+각 run:
+
+1. selected chat의 신규 attachment candidate를 찾습니다.
+2. `localFilePath`가 readable이면 복사합니다.
+3. fresh `attachment.url`을 즉시 시도합니다.
+4. 다운로드 파일은 ignored `data/media` 또는 local-only path에 저장합니다.
+5. HTTP status와 size만 기록합니다.
+6. 410은 expired로 표시합니다.
+7. message body와 raw URL은 로그에 남기지 않습니다.
 
 ## Scheduling
 
-Prefer LaunchAgent on macOS because it survives reboot and fits user-session apps better than headless cron.
+macOS에서는 LaunchAgent를 선호합니다. user-session app과 잘 맞고 reboot 이후 복구가 쉽습니다.
 
-The LaunchAgent should:
+LaunchAgent는 다음을 지켜야 합니다.
 
-- run as the logged-in user
-- set a minimal PATH
-- write logs under ignored `logs/`
-- never include SQLCipher keys in the plist
-- call a wrapper script that reads local config
+- logged-in user로 실행.
+- 최소 PATH 설정.
+- ignored `logs/` 아래에 로그 기록.
+- plist에 SQLCipher key를 넣지 않음.
+- local config를 읽는 wrapper script 호출.
 
 ## kmsg Notes
 
-`kmsg` can send/read KakaoTalk via UI automation, but it is not the archive source of truth.
+`kmsg`는 UI automation으로 KakaoTalk send/read를 할 수 있지만 archive source of truth가 아닙니다.
 
-Known operational caveats:
+운영 caveat:
 
-- Accessibility can differ between SSH direct execution and LaunchAgent execution.
-- Room search can fail if the KakaoTalk UI is not in a focusable state.
-- Prefer `--chat-id` when `kmsg chats` can see the room.
+- Accessibility 상태는 SSH direct execution과 LaunchAgent execution에서 다를 수 있습니다.
+- KakaoTalk UI가 focus 가능한 상태가 아니면 room search가 실패할 수 있습니다.
+- `kmsg chats`에서 room이 보이면 `--chat-id`를 선호합니다.
 
-Use `kmsg` for:
+`kmsg` 사용처:
 
 - reminders
 - manual bridge tests
 - reply automation after confirmation
 
-Avoid `kmsg` for:
+`kmsg`를 피할 곳:
 
 - bulk archive collection
 - attachment preservation
 - claims of reliable DB sync
+
+---
+
+# English Summary
+
+Use `kakaocli 0.4.1` for read-only local DB inspection on KakaoTalk for Mac 26.1.4/26.4.1. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.

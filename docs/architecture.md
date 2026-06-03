@@ -1,19 +1,19 @@
 # Architecture
 
-## Goal
+## 목표
 
-Collect selected KakaoTalk PC conversations and attachment metadata into a local archive that can later support search, summaries, dashboards, and rule-based reply drafts.
+선택한 KakaoTalk PC 대화와 첨부파일 metadata를 로컬 archive로 수집합니다. 이후 search, summaries, dashboards, rule-based reply drafts에 사용할 수 있습니다.
 
-## Principles
+## 원칙
 
 - Local-first.
-- Private by default.
-- Allowlist-only chat collection.
-- Raw data stays out of git.
-- Message collection comes before automation.
-- Sending replies requires explicit confirmation until proven safe.
+- 공개 저장소에는 sanitized docs/code만 둡니다.
+- raw data는 private local storage에만 둡니다.
+- allowlist에 들어간 채팅방만 수집합니다.
+- message collection이 automation보다 먼저입니다.
+- 실제 답장 발송은 충분히 검증될 때까지 confirmation을 요구합니다.
 
-## Data Flow
+## Data flow
 
 ```text
 KakaoTalk local DB/cache
@@ -25,7 +25,7 @@ KakaoTalk local DB/cache
   -> optional draft replies
 ```
 
-## Suggested Tables
+## Suggested tables
 
 ```sql
 create table if not exists source_runs (
@@ -89,13 +89,18 @@ create table if not exists reply_candidates (
 );
 ```
 
-## Current Mac Adapter
+## Current Mac adapter
 
-The current practical adapter shells out to:
+현재 macOS adapter는 다음 명령을 사용합니다.
 
 ```bash
 kakaocli query "<SQL>" --db "$databasePath" --key "$key"
 ```
 
-The local config provides `databasePath` and `key`. These values must never be committed.
+local config가 `databasePath`와 `key`를 제공합니다. 이 값은 절대 commit하지 않습니다.
 
+---
+
+# English Summary
+
+The repository can be public, but raw KakaoTalk data must remain private and local. Collect only allowlisted chats, keep raw messages/media/DB files out of git, and require confirmation before real reply sending.
