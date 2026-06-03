@@ -57,6 +57,18 @@ The skill intentionally separates:
 - future Windows research
 - private GitHub distribution notes
 
+## Install For Another Agent
+
+For a local OpenClaw/Codex-style skill directory, copy the skill folder:
+
+```bash
+cp -R skills/kakao-pc-archive ~/.openclaw/agents/<agent-name>/agent/codex-home/skills/
+```
+
+Then tell the agent to use `kakao-pc-archive` when collecting selected KakaoTalk messages or attachments.
+
+Each machine must create its own local config. Do not share the original operator's `~/.kakaocli/config.json`, DB path, SQLCipher key, archive DB, or downloaded media.
+
 ## Can This Reply Automatically?
 
 Yes, but replying is a second phase.

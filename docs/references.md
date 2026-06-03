@@ -34,3 +34,23 @@
 
 These references are for private research and implementation planning. Respect KakaoTalk terms, local laws, and user consent requirements.
 
+This repository intentionally avoids copying private paths, keys, raw messages, or raw attachment URLs into docs.
+
+## Internal Skill References
+
+- `skills/kakao-pc-archive/SKILL.md`
+- `skills/kakao-pc-archive/references/version-support.md`
+- `skills/kakao-pc-archive/references/macos-operations.md`
+- `skills/kakao-pc-archive/references/github-private-distribution.md`
+
+## Local Implementation Notes
+
+The current verified approach is based on local macOS KakaoTalk DB reads through `kakaocli`:
+
+```bash
+kakaocli query "<SQL>" --db "$databasePath" --key "$key"
+```
+
+Known KakaoTalk Mac message table shape includes `NTChatRoom` and `NTChatMessage`. Useful message fields include chat/message identifiers, author, message type, message body, `attachment`, `supplement`, `extra`, `sentAt`, and `localFilePath`.
+
+Attachment JSON fields vary by message type. The collector should parse known fields and preserve unknown JSON for later classification.

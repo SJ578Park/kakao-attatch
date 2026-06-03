@@ -53,3 +53,15 @@ Split the code into:
 
 Do not advertise Windows support until a Windows probe can list chats and read selected messages from a local test account.
 
+## Version Reporting Rule
+
+Every shared runbook or handoff should include:
+
+- checked date
+- host OS version
+- KakaoTalk app version
+- collector adapter name
+- last DB read test result
+- last attachment probe result
+
+Do not infer support from an old successful run after KakaoTalk updates. Re-run the checks in `skills/kakao-pc-archive/references/version-support.md`.

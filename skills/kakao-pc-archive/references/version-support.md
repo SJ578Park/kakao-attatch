@@ -30,6 +30,19 @@ If neither command works, record:
 KakaoTalk version: not verified on this host
 ```
 
+Recommended support record format:
+
+```text
+Checked at: YYYY-MM-DD
+Host OS: macOS <version>
+KakaoTalk app version: <version or not verified>
+kakaocli version/commit: <version or not verified>
+DB read test: pass/fail
+Selected-chat message query: pass/fail
+Fresh attachment download probe: pass/fail/not run
+Notes: <redacted operational notes only>
+```
+
 ## Compatibility Matrix
 
 - macOS + KakaoTalk for Mac + `kakaocli`: verified approach in current workspace.
