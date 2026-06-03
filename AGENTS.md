@@ -9,7 +9,7 @@
 주요 작업:
 
 - 선택한 KakaoTalk for Mac 채팅방 메시지를 로컬 DB에서 read-only로 확인한다.
-- 첨부파일 metadata와 fresh URL 다운로드 가능 여부를 기록한다.
+- 첨부파일 metadata와 fresh URL 다운로드 가능 여부를 기록한다. 단, 지원 환경으로 표시하려면 실제 다운로드 probe가 통과해야 한다.
 - KakaoTalk/client 버전을 기록한 뒤 지원 여부를 말한다.
 - raw chat data, media, DB files, keys, user IDs, raw URLs를 git에 넣지 않는다.
 
@@ -49,7 +49,8 @@
 새 검증 결과가 없으면 아래 문구를 사용한다.
 
 ```text
-Intel Mac x86_64 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + kakaocli 0.4.1 direct SQLCipher DB read가 기본 검증 기준이고, Apple Silicon arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181에서도 동일한 read-only DB probe가 재현됐다.
+Intel Mac x86_64 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + kakaocli 0.4.1 direct SQLCipher DB read가 기본 검증 기준이다.
+Apple Silicon arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181은 kakaocli auth --user-id 기반 DB open과 NTChatRoom / NTChatMessage 테이블 확인까지만 통과했다. userId 자동탐색, kakaocli query, 외부 sqlcipher 직접 query, fresh attachment URL download는 미통과/미확인이다.
 Windows KakaoTalk support는 research-only다.
 첨부파일 보존은 best-effort이며 URL 만료 전에 주기적으로 확인해야 한다.
 ```

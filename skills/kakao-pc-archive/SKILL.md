@@ -10,7 +10,9 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 ## 기본 경계
 
 - 기본 검증 경로: Intel Mac x86_64 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1` direct DB read.
-- 재현 확인 경로: Apple Silicon arm64 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1` direct DB read.
+- Apple Silicon 재검증 경로: arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181.
+  - 통과: `kakaocli auth --user-id`, DB 파일 탐색, SQLCipher open, `NTChatRoom` / `NTChatMessage` 테이블 확인.
+  - 미통과/미확인: userId 자동탐색, `kakaocli query`, 외부 `sqlcipher` 직접 query, fresh attachment URL download.
 - 텍스트 수집은 UI 자동화가 아니라 read-only DB 조회를 우선한다.
 - 첨부파일 보존은 시간 민감하다. 새 `attachment.url`이 만료되기 전에 빠르게 확인하고 HTTP status를 기록한다.
 - `kmsg`는 UI send/read/reminder 보조용이다. archive source of truth로 쓰지 않는다.
@@ -26,12 +28,14 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 ## 텍스트 데이터 확인
 
-1. 로컬 `~/.kakaocli/config.json`에서 `databasePath`, `key` 존재 여부만 확인한다.
-2. `kakaocli query "<SQL>" --db "$databasePath" --key "$key"` 형태로 read-only query를 실행한다.
-3. `NTChatRoom`에서 채팅방 목록을 확인한다.
-4. allowlist에 들어간 채팅방만 `NTChatMessage`에서 최근 메시지를 조회한다.
-5. `chatId`, `logId`, `msgId`, `authorId`, `type`, `message`, `attachment`, `sentAt`, `localFilePath` 컬럼을 확인한다.
-6. 공유 결과에는 pass/fail, 컬럼 존재 여부, count만 남긴다.
+1. 로컬 `~/.kakaocli/config.json`에서 `databasePath`, `key`, `userId` 존재 여부만 확인한다.
+2. `kakaocli auth` 또는 `kakaocli auth --user-id <local_user_id>`로 DB open과 주요 테이블 존재 여부를 확인한다.
+3. `kakaocli query "<SQL>" --db "$databasePath" --key "$key"` 또는 collector의 실제 read-only query가 통과하는지 확인한다.
+4. `NTChatRoom`에서 채팅방 목록을 확인한다.
+5. allowlist에 들어간 채팅방만 `NTChatMessage`에서 최근 메시지를 조회한다.
+6. `chatId`, `logId`, `msgId`, `authorId`, `type`, `message`, `attachment`, `sentAt`, `localFilePath` 컬럼을 확인한다.
+7. 공유 결과에는 pass/fail, 컬럼 존재 여부, count만 남긴다.
+8. `auth`만 통과하고 `query`가 실패하면 텍스트 아카이브 지원으로 표시하지 않는다.
 
 ## 첨부파일 확인
 
@@ -55,7 +59,7 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 ## English Summary
 
-Use this skill for selected KakaoTalk PC/Mac local archive workflows. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 using `kakaocli 0.4.1` direct SQLCipher DB reads. The same read-only DB probes were reproduced on Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181.
+Use this skill for selected KakaoTalk PC/Mac local archive workflows. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 using `kakaocli 0.4.1` direct SQLCipher DB reads. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility.
 
 Text collection should use read-only DB queries. Attachment preservation is freshness-sensitive; run every 1-3 hours for active rooms and record HTTP status without logging raw URLs.
 

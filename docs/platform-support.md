@@ -2,22 +2,25 @@
 
 ## 현재 결론
 
-현재 구현은 **macOS KakaoTalk for Mac 전용으로 검증**되어 있습니다.
+현재 구현은 **macOS KakaoTalk for Mac 전용으로 기록**되어 있습니다. 다만 검증 수준은 환경별로 다릅니다.
 
 검증 기준:
 
 ```text
 확인일: 2026-06-03
-검증 호스트:
+기본 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
-수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
-텍스트 확인: NTChatRoom / NTChatMessage read-only query
-첨부 확인: NTChatMessage.attachment JSON + fresh URL download attempt
+  - 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
+  - 텍스트 확인: NTChatRoom / NTChatMessage read-only query
+  - 첨부 확인: NTChatMessage.attachment JSON + fresh URL download attempt
+Apple Silicon 재검증 호스트:
+  - Apple Silicon Mac: arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
+  - 통과: kakaocli auth --user-id, DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage 테이블 확인
+  - 미통과/미확인: userId 자동탐색, kakaocli query, 외부 sqlcipher 직접 query, fresh attachment URL download
 UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 ```
 
-기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac에서는 동일한 read-only DB probe가 재현되는지 확인했습니다.
+기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac에서는 DB 파일과 주요 테이블 open까지만 재현되었습니다. 메시지 query와 첨부 URL 다운로드까지 통과하기 전에는 Apple Silicon 환경을 완전 지원으로 표시하지 않습니다.
 
 이 기능은 카카오톡 버전에 영향을 받을 수 있습니다. KakaoTalk for Mac이 업데이트되면 다음 요소가 바뀔 수 있습니다.
 
@@ -30,7 +33,7 @@ UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 - 첨부 URL 만료 시간과 HTTP 응답 정책
 - macOS Accessibility 동작
 
-따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다.
+따라서 **KakaoTalk for Mac 26.1.4 build 1163 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다. 26.4.1 build 1181은 DB open 부분 재검증 기록으로만 취급합니다.
 
 ## macOS
 
@@ -75,17 +78,19 @@ Windows에서 별도로 확인해야 할 항목:
 KakaoTalk 업데이트 후에는 아래를 다시 확인합니다.
 
 1. KakaoTalk 앱 버전을 기록합니다.
-2. `~/.kakaocli/config.json`에 `databasePath`, `key`가 있는지 확인합니다.
-3. DB 파일이 존재하고 read-only query가 되는지 확인합니다.
-4. `NTChatRoom`에서 채팅방 목록을 조회합니다.
-5. 선택한 채팅방의 `NTChatMessage`를 조회합니다.
-6. 새 첨부파일을 하나 받아 `attachment` JSON 구조와 즉시 다운로드 가능 여부를 확인합니다.
-7. 결과는 pass/fail과 HTTP status count만 기록합니다.
-8. 원문 메시지, key, raw URL, 계정별 DB path는 기록하지 않습니다.
+2. `~/.kakaocli/config.json`에 `databasePath`, `key`, `userId` 중 어떤 값이 있는지 확인합니다.
+3. `kakaocli auth`가 실패하면 `kakaocli auth --user-id <local_user_id>`로 DB open을 확인합니다.
+4. DB 파일이 존재하고 `NTChatRoom` / `NTChatMessage` 테이블이 보이는지 확인합니다.
+5. `kakaocli query` 또는 collector가 실제 read-only query를 실행할 수 있는지 확인합니다.
+6. `NTChatRoom`에서 채팅방 목록을 조회합니다.
+7. 선택한 채팅방의 `NTChatMessage`를 조회합니다.
+8. 새 첨부파일을 하나 받아 `attachment` JSON 구조와 즉시 다운로드 가능 여부를 확인합니다.
+9. 결과는 pass/fail과 HTTP status count만 기록합니다.
+10. 원문 메시지, key, raw URL, 계정별 DB path는 기록하지 않습니다.
 
 ## English Summary
 
-The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. The same read-only DB probes were reproduced on an Apple Silicon Mac (arm64, Apple M4) running KakaoTalk for Mac 26.4.1 build 1181. The collector uses `kakaocli 0.4.1` to read the local SQLCipher database in read-only mode. `kmsg 0.3.0` is only a UI send/read helper.
+The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility. Automatic user ID detection, `kakaocli query`, external SQLCipher queries, and fresh attachment URL download were not fully verified on that environment.
 
 KakaoTalk updates may change DB paths, key derivation, table names, columns, attachment JSON shape, URL expiry behavior, or Accessibility behavior. Revalidate before claiming support on another KakaoTalk version.
 

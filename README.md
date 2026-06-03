@@ -17,22 +17,25 @@ public 상태에서 지켜야 할 기준:
 
 ## 동작 확인 환경
 
-현재 확인된 기준 환경:
+현재 기록된 기준 환경:
 
 ```text
 확인일: 2026-06-03
-검증 호스트:
+기본 검증 기준:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
-수집 방식: kakaocli 0.4.1 direct SQLCipher DB read
-텍스트 확인: NTChatRoom / NTChatMessage read-only query
-첨부파일 확인: NTChatMessage.attachment JSON + fresh URL download attempt
+  - 수집 방식: kakaocli 0.4.1 direct SQLCipher DB read
+  - 텍스트 확인: NTChatRoom / NTChatMessage read-only query
+  - 첨부파일 확인: NTChatMessage.attachment JSON + fresh URL download attempt
+Apple Silicon 재검증:
+  - Apple Silicon Mac: arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
+  - 결과: kakaocli auth --user-id 경로에서 DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage 테이블 확인 통과
+  - 한계: userId 자동탐색 실패, kakaocli query 및 외부 sqlcipher 직접 query 실패, 첨부 URL 다운로드 probe 미통과
 UI 보조 도구: kmsg 0.3.0
 Windows: 미검증
 Mobile KakaoTalk: 범위 밖
 ```
 
-카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다.
+카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다. Apple Silicon 26.4.1 build 1181 환경은 DB 파일/테이블 open까지만 확인되었으므로, 현재 문서 기준으로는 첨부 URL 보존까지 지원한다고 주장하지 않습니다.
 
 ## 핵심 방식
 
@@ -48,11 +51,12 @@ Mobile KakaoTalk: 범위 밖
 
 요약:
 
-1. `~/.kakaocli/config.json`에 `databasePath`, `key`가 있는지 로컬에서 확인합니다.
-2. `kakaocli query`로 채팅방 목록을 read-only 조회합니다.
-3. 수집할 채팅방만 allowlist에 추가합니다.
-4. `NTChatMessage`에서 해당 채팅방의 최근 메시지 몇 건만 조회해 컬럼 구조와 timestamp를 확인합니다.
-5. 공유 로그에는 원문 메시지, 키, DB 경로, raw URL을 남기지 않습니다.
+1. `~/.kakaocli/config.json`에 `databasePath`, `key` 또는 `userId`가 있는지 로컬에서 확인합니다.
+2. `kakaocli auth` 또는 `kakaocli auth --user-id <local_user_id>`로 DB 파일과 테이블이 열리는지 확인합니다.
+3. `kakaocli query`로 채팅방 목록을 read-only 조회합니다. 이 단계가 실패하면 텍스트 아카이브를 지원한다고 기록하지 않습니다.
+4. 수집할 채팅방만 allowlist에 추가합니다.
+5. `NTChatMessage`에서 해당 채팅방의 최근 메시지 몇 건만 조회해 컬럼 구조와 timestamp를 확인합니다.
+6. 공유 로그에는 원문 메시지, 키, DB 경로, raw URL을 남기지 않습니다.
 
 ## 첨부파일 수집 사용법
 
@@ -109,15 +113,16 @@ cp -R skills/kakao-pc-archive ~/.openclaw/agents/<agent-name>/agent/codex-home/s
 
 This repository is a documentation-first OpenClaw/Codex skill package for archiving selected KakaoTalk PC/Mac conversations and attachment metadata from local data.
 
-Verified baseline as of 2026-06-03:
+Recorded baseline as of 2026-06-03:
 
 - macOS 13.7.8
 - Intel Mac baseline: KakaoTalk for Mac 26.1.4 build 1163 on macOS 13.7.8
-- Apple Silicon reproduction: KakaoTalk for Mac 26.4.1 build 1181 on Apple M4
 - `kakaocli 0.4.1` direct SQLCipher DB reads
 - `kmsg 0.3.0` for UI send/read assistance only
 - text verification through read-only `NTChatRoom` / `NTChatMessage` queries
 - attachment metadata through `NTChatMessage.attachment`
 - Windows is not verified
+
+Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03. `kakaocli auth --user-id` could locate and open the database and list `NTChatRoom` / `NTChatMessage`, but automatic user ID detection, `kakaocli query`, direct external SQLCipher queries, and fresh attachment URL download were not fully verified. Do not claim full attachment archive support on that environment until those probes pass.
 
 KakaoTalk updates may change DB paths, key derivation, table/column names, attachment JSON shape, or URL expiry behavior. Revalidate before claiming support on another version.

@@ -7,17 +7,20 @@
 ```text
 지원 수준: macOS verified, Windows unverified
 확인일: 2026-06-03
-검증 호스트:
+기본 검증 호스트:
   - Intel Mac: x86_64, Intel Core i5, macOS 13.7.8, KakaoTalk for Mac 26.1.4 build 1163
-  - Apple Silicon Mac: arm64, Apple M4, KakaoTalk for Mac 26.4.1 build 1181
 KakaoTalk client: KakaoTalk for Mac
 수집 adapter: kakaocli 0.4.1 direct SQLCipher DB read
 첨부 adapter: DB attachment JSON + fresh URL downloader + optional cache watcher
 UI automation: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 이전 첨부 동작 probe: 2026-05-21
+Apple Silicon 재검증:
+  - arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
+  - 통과: kakaocli auth --user-id, DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage 테이블 확인
+  - 미통과/미확인: userId 자동탐색, kakaocli query, 외부 sqlcipher 직접 query, fresh attachment URL download
 ```
 
-KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전은 “동작 가능성이 있음”으로만 보고, 직접 재검증 전에는 지원된다고 말하지 않는다.
+KakaoTalk for Mac 26.1.4 build 1163 외 버전은 “동작 가능성이 있음”으로만 보고, 직접 재검증 전에는 지원된다고 말하지 않는다. 26.4.1 build 1181은 DB open과 테이블 확인까지만 기록된 부분 재검증 환경이다.
 
 ## 버전 caveat
 
@@ -60,7 +63,7 @@ Notes: <redacted operational notes only>
 ## 호환성 매트릭스
 
 - Intel Mac x86_64 + Intel Core i5 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1`: 기본 검증 기준.
-- Apple Silicon Mac arm64 + Apple M4 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: 동일 read-only DB probe 재현 확인.
+- Apple Silicon Mac arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181 + `kakaocli 0.4.1`: `auth --user-id` 기반 DB open과 `NTChatRoom` / `NTChatMessage` 테이블 확인 통과. 메시지 query와 첨부 URL 다운로드는 미통과/미확인.
 - macOS + 다른 KakaoTalk for Mac 버전: 재검증 필요.
 - macOS + `kmsg`: UI send/read/reminder 자동화에 유용하지만 search focus, recent chat state에 취약할 수 있음.
 - Windows + KakaoTalk PC: 미검증. 별도 probe 필요.
@@ -69,14 +72,16 @@ Notes: <redacted operational notes only>
 ## 업데이트 후 재검증 체크리스트
 
 1. Full Disk Access가 DB read를 허용하는지 확인한다.
-2. `~/.kakaocli/config.json`의 DB 경로가 실제 파일을 가리키는지 확인한다.
-3. `NTChatRoom` read-only query를 실행한다.
-4. 선택 채팅방의 `NTChatMessage` read-only query를 실행한다.
-5. 필수 필드가 존재하는지 확인한다: chat id, message/log id, author, type, body, attachment JSON, sent timestamp.
-6. allowlist 채팅방에서 테스트 첨부파일을 하나 보내거나 받은 뒤 `attachment` JSON 구조를 확인한다.
-7. fresh URL 다운로드 가능 여부와 HTTP status count를 기록한다.
-8. raw URL, 원문 메시지, key, 전체 DB path는 기록하지 않는다.
-9. 동작이 바뀌면 이 파일을 업데이트한다.
+2. `~/.kakaocli/config.json`의 DB 경로 또는 `userId`가 있는지 확인한다.
+3. `kakaocli auth`가 실패하면 `kakaocli auth --user-id <local_user_id>`로 DB open을 확인한다.
+4. `NTChatRoom` / `NTChatMessage` 테이블이 보이는지 확인한다.
+5. `NTChatRoom` read-only query를 실행한다.
+6. 선택 채팅방의 `NTChatMessage` read-only query를 실행한다.
+7. 필수 필드가 존재하는지 확인한다: chat id, message/log id, author, type, body, attachment JSON, sent timestamp.
+8. allowlist 채팅방에서 테스트 첨부파일을 하나 보내거나 받은 뒤 `attachment` JSON 구조를 확인한다.
+9. fresh URL 다운로드 가능 여부와 HTTP status count를 기록한다.
+10. raw URL, 원문 메시지, key, 전체 DB path는 기록하지 않는다.
+11. 동작이 바뀌면 이 파일을 업데이트한다.
 
 ## 알려진 첨부 동작
 
@@ -90,7 +95,7 @@ Notes: <redacted operational notes only>
 
 ## English Summary
 
-Verified baselines: Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 and Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181, both with `kakaocli 0.4.1`, checked on 2026-06-03.
+Verified baseline: Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 and `kakaocli 0.4.1`, checked on 2026-06-03. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility.
 
 Any other KakaoTalk version requires revalidation because DB paths, key derivation, table/column names, attachment JSON shape, URL expiry behavior, and Accessibility behavior can change.
 

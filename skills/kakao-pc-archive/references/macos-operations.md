@@ -4,13 +4,14 @@
 
 - KakaoTalk for Mac 설치 및 로그인.
 - 검증된 KakaoTalk for Mac 버전:
-  - Intel Mac x86_64: `26.1.4` build `1163`
-  - Apple Silicon arm64: `26.4.1` build `1181`
+  - Intel Mac x86_64: `26.1.4` build `1163` full text/attachment baseline
+  - Apple Silicon arm64 + Apple M4: `26.4.1` build `1181` partial DB-open probe only
 - `kakaocli 0.4.1` 설치.
 - `kmsg 0.3.0` 설치. 단, archive source가 아니라 UI send/read 용도.
 - `~/.kakaocli/config.json`:
   - `databasePath`
   - `key`
+  - `userId` 또는 로컬에서 수동 확인 가능한 user id
 - KakaoTalk container data를 읽는 process에 Full Disk Access 필요 가능.
 - `kmsg send/read` 같은 UI action에는 Accessibility permission 필요.
 
@@ -23,7 +24,15 @@
 
 계정 hash나 local username이 포함된 전체 경로는 commit하지 않습니다.
 
-## 안전한 query pattern
+## 안전한 auth/query pattern
+
+먼저 DB open을 확인합니다. 자동 userId 탐색이 실패하면 로컬 userId를 명시합니다.
+
+```bash
+kakaocli auth --user-id "$localUserId"
+```
+
+이 단계는 DB 파일과 주요 테이블을 열 수 있는지만 확인합니다. 실제 메시지 아카이브 지원을 주장하려면 read-only query까지 통과해야 합니다.
 
 local config에서 `--db`, `--key` 값을 읽어 명시적으로 전달합니다. 두 값은 로그에 남기지 않습니다.
 
@@ -38,6 +47,7 @@ kakaocli query "<SQL>" --db "$databasePath" --key "$key"
 - bounded query에 timeout을 겁니다.
 - JSON output을 parsing합니다.
 - selected chat이 비어 있으면 fail closed합니다.
+- `auth`만 통과하고 `query`가 실패하면 partial support로 기록합니다.
 
 ## 텍스트 데이터 확인
 
@@ -136,4 +146,4 @@ LaunchAgent는 다음을 지켜야 합니다.
 
 # English Summary
 
-Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163; read-only DB behavior was reproduced on Apple Silicon arm64 with KakaoTalk for Mac 26.4.1 build 1181. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.
+Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 is currently partial: `auth --user-id` can open the DB and list key tables, but message query and fresh attachment URL download were not fully verified. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.
