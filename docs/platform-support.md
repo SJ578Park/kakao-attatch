@@ -15,12 +15,13 @@
   - 첨부 확인: NTChatMessage.attachment JSON + fresh URL download attempt
 Apple Silicon 재검증 호스트:
   - Apple Silicon Mac: arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
-  - 통과: kakaocli auth --user-id, DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage 테이블 확인
-  - 미통과/미확인: userId 자동탐색, kakaocli query, 외부 sqlcipher 직접 query, fresh attachment URL download
+  - 통과: kakaocli auth --user-id, DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage query, attachment JSON parse
+  - 첨부 URL probe: 최근 attachment URL 샘플 25개 중 HTTP 206 19건, HTTP 200 4건, HTTP 303 1건, HTTP 403 1건
+  - 주의: userId 자동탐색이 실패할 수 있으므로 필요하면 local userId를 명시해 auth를 먼저 실행
 UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 ```
 
-기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac에서는 DB 파일과 주요 테이블 open까지만 재현되었습니다. 메시지 query와 첨부 URL 다운로드까지 통과하기 전에는 Apple Silicon 환경을 완전 지원으로 표시하지 않습니다.
+기본 검증 기준은 Intel Mac 환경입니다. Apple Silicon Mac 26.4.1 build 1181에서도 DB query와 첨부 URL 샘플 접근이 재현되었습니다. 다만 자동 userId 탐색이 실패할 수 있으므로, `kakaocli auth --user-id <local_user_id>`를 먼저 실행하는 절차를 문서화합니다.
 
 이 기능은 카카오톡 버전에 영향을 받을 수 있습니다. KakaoTalk for Mac이 업데이트되면 다음 요소가 바뀔 수 있습니다.
 
@@ -33,7 +34,7 @@ UI 자동화: kmsg 0.3.0은 send/read 보조용, archive source of truth 아님
 - 첨부 URL 만료 시간과 HTTP 응답 정책
 - macOS Accessibility 동작
 
-따라서 **KakaoTalk for Mac 26.1.4 build 1163 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다. 26.4.1 build 1181은 DB open 부분 재검증 기록으로만 취급합니다.
+따라서 **KakaoTalk for Mac 26.1.4 build 1163 / 26.4.1 build 1181 외 버전에서는 지원을 주장하기 전에 재검증**해야 합니다.
 
 ## macOS
 
@@ -90,7 +91,7 @@ KakaoTalk 업데이트 후에는 아래를 다시 확인합니다.
 
 ## English Summary
 
-The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility. Automatic user ID detection, `kakaocli query`, external SQLCipher queries, and fresh attachment URL download were not fully verified on that environment.
+The primary verified baseline is an Intel Mac (x86_64, Intel Core i5, macOS 13.7.8) running KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03: `kakaocli auth --user-id`, database open, `NTChatRoom` / `NTChatMessage` queries, attachment JSON parsing, and sampled attachment URL access passed. Automatic user ID detection may fail, so run auth with a local user ID when needed.
 
 KakaoTalk updates may change DB paths, key derivation, table names, columns, attachment JSON shape, URL expiry behavior, or Accessibility behavior. Revalidate before claiming support on another KakaoTalk version.
 

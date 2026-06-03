@@ -11,8 +11,8 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 - 기본 검증 경로: Intel Mac x86_64 + KakaoTalk for Mac 26.1.4 build 1163 + `kakaocli 0.4.1` direct DB read.
 - Apple Silicon 재검증 경로: arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181.
-  - 통과: `kakaocli auth --user-id`, DB 파일 탐색, SQLCipher open, `NTChatRoom` / `NTChatMessage` 테이블 확인.
-  - 미통과/미확인: userId 자동탐색, `kakaocli query`, 외부 `sqlcipher` 직접 query, fresh attachment URL download.
+  - 통과: `kakaocli auth --user-id`, DB 파일 탐색, SQLCipher open, `NTChatRoom` / `NTChatMessage` query, attachment JSON parse, attachment URL 샘플 접근.
+  - 주의: userId 자동탐색이 실패할 수 있으므로 필요하면 local userId를 명시해 auth를 먼저 실행한다.
 - 텍스트 수집은 UI 자동화가 아니라 read-only DB 조회를 우선한다.
 - 첨부파일 보존은 시간 민감하다. 새 `attachment.url`이 만료되기 전에 빠르게 확인하고 HTTP status를 기록한다.
 - `kmsg`는 UI send/read/reminder 보조용이다. archive source of truth로 쓰지 않는다.
@@ -59,7 +59,7 @@ description: "Collect selected KakaoTalk PC messages and attachments from local 
 
 ## English Summary
 
-Use this skill for selected KakaoTalk PC/Mac local archive workflows. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 using `kakaocli 0.4.1` direct SQLCipher DB reads. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility.
+Use this skill for selected KakaoTalk PC/Mac local archive workflows. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163 using `kakaocli 0.4.1` direct SQLCipher DB reads. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03 through `kakaocli auth --user-id`, database open, `NTChatRoom` / `NTChatMessage` queries, attachment JSON parsing, and sampled attachment URL access.
 
 Text collection should use read-only DB queries. Attachment preservation is freshness-sensitive; run every 1-3 hours for active rooms and record HTTP status without logging raw URLs.
 

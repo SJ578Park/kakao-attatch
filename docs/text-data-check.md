@@ -11,10 +11,10 @@
   - Apple Silicon Mac: arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
 수집 도구: kakaocli 0.4.1
 Intel Mac DB 접근: local SQLCipher DB read-only query
-Apple Silicon DB 접근: auth --user-id 기반 DB open과 테이블 확인까지만 통과, query 미통과
+Apple Silicon DB 접근: auth --user-id 기반 DB open, NTChatRoom / NTChatMessage query 통과
 ```
 
-기본 검증 기준은 Intel Mac입니다. Apple Silicon 26.4.1 build 1181에서는 `kakaocli auth --user-id`로 DB 파일과 `NTChatRoom` / `NTChatMessage` 테이블 open은 확인되었지만, `kakaocli query` 경로가 통과하지 않았습니다. 따라서 Apple Silicon 환경에서 텍스트 아카이브를 지원한다고 기록하려면 선택 채팅방 query까지 다시 통과시켜야 합니다.
+기본 검증 기준은 Intel Mac입니다. Apple Silicon 26.4.1 build 1181에서도 `kakaocli auth --user-id` 후 `NTChatRoom` / `NTChatMessage` query가 통과했습니다. 자동 userId 탐색이 실패할 수 있으므로 필요하면 local userId를 명시해 auth를 먼저 실행합니다.
 
 ## 사전 조건
 
@@ -79,7 +79,7 @@ limit 20;
 kakaocli query "<SQL>" --db "$databasePath" --key "$key"
 ```
 
-이 단계가 실패하면 해당 환경은 `db_open: pass`, `selected_chat_query: fail`로 기록합니다.
+이 단계가 실패하면 해당 환경은 `db_open: pass`, `selected_chat_query: fail`로 기록합니다. query가 통과하면 `selected_chat_query: pass`로 승격합니다.
 
 ## 4. 선택 채팅방 메시지 확인
 
@@ -126,12 +126,13 @@ checked_at: 2026-06-03
 host: Apple Silicon Mac arm64, Apple M4
 kakaotalk_version: 26.4.1 build 1181
 db_open: pass
-selected_chat_query: fail or not verified
-attachment_url_download: not verified
+selected_chat_query: pass
+attachment_json_parse: pass
+attachment_url_download: pass on sampled URLs
 ```
 
 ## English Summary
 
-Use `kakaocli 0.4.1` to read the KakaoTalk for Mac local SQLCipher database in read-only mode. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked only up to `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` table visibility as of 2026-06-03.
+Use `kakaocli 0.4.1` to read the KakaoTalk for Mac local SQLCipher database in read-only mode. The primary verified baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked through `kakaocli auth --user-id`, database open, and `NTChatRoom` / `NTChatMessage` queries as of 2026-06-03.
 
 Before claiming support on another version, verify the KakaoTalk app version, local `kakaocli` config presence, `NTChatRoom` query, and selected `NTChatMessage` query. Do not log DB paths, keys, raw message bodies, or raw attachment URLs.

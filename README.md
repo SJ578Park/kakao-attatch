@@ -28,14 +28,15 @@ public 상태에서 지켜야 할 기준:
   - 첨부파일 확인: NTChatMessage.attachment JSON + fresh URL download attempt
 Apple Silicon 재검증:
   - Apple Silicon Mac: arm64, Apple M4, macOS 26.4.1, KakaoTalk for Mac 26.4.1 build 1181
-  - 결과: kakaocli auth --user-id 경로에서 DB 파일 탐색, SQLCipher open, NTChatRoom / NTChatMessage 테이블 확인 통과
-  - 한계: userId 자동탐색 실패, kakaocli query 및 외부 sqlcipher 직접 query 실패, 첨부 URL 다운로드 probe 미통과
+  - 결과: kakaocli auth --user-id, DB open, NTChatRoom / NTChatMessage query, attachment JSON parse 통과
+  - 첨부 URL probe: 최근 attachment URL 샘플 25개 중 HTTP 206 19건, HTTP 200 4건, HTTP 303 1건, HTTP 403 1건
+  - 주의: userId 자동탐색이 실패할 수 있으므로 필요하면 local userId를 명시해 auth를 먼저 실행
 UI 보조 도구: kmsg 0.3.0
 Windows: 미검증
 Mobile KakaoTalk: 범위 밖
 ```
 
-카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다. Apple Silicon 26.4.1 build 1181 환경은 DB 파일/테이블 open까지만 확인되었으므로, 현재 문서 기준으로는 첨부 URL 보존까지 지원한다고 주장하지 않습니다.
+카카오톡 업데이트에 따라 DB 위치, 암호화 키 유도 방식, 테이블/컬럼명, 첨부 JSON 구조, URL 만료 정책이 바뀔 수 있습니다. 따라서 위 버전 외 환경에서는 먼저 `docs/platform-support.md`와 `skills/kakao-pc-archive/references/version-support.md`의 재검증 절차를 실행해야 합니다.
 
 ## 핵심 방식
 
@@ -123,6 +124,6 @@ Recorded baseline as of 2026-06-03:
 - attachment metadata through `NTChatMessage.attachment`
 - Windows is not verified
 
-Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03. `kakaocli auth --user-id` could locate and open the database and list `NTChatRoom` / `NTChatMessage`, but automatic user ID detection, `kakaocli query`, direct external SQLCipher queries, and fresh attachment URL download were not fully verified. Do not claim full attachment archive support on that environment until those probes pass.
+Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03. `kakaocli auth --user-id`, database open, `NTChatRoom` / `NTChatMessage` queries, attachment JSON parsing, and sampled attachment URL access passed. Automatic user ID detection may fail, so run auth with a local user ID when needed.
 
 KakaoTalk updates may change DB paths, key derivation, table/column names, attachment JSON shape, or URL expiry behavior. Revalidate before claiming support on another version.

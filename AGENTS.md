@@ -50,7 +50,7 @@
 
 ```text
 Intel Mac x86_64 + macOS 13.7.8 + KakaoTalk for Mac 26.1.4 build 1163 + kakaocli 0.4.1 direct SQLCipher DB read가 기본 검증 기준이다.
-Apple Silicon arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181은 kakaocli auth --user-id 기반 DB open과 NTChatRoom / NTChatMessage 테이블 확인까지만 통과했다. userId 자동탐색, kakaocli query, 외부 sqlcipher 직접 query, fresh attachment URL download는 미통과/미확인이다.
+Apple Silicon arm64 + Apple M4 + macOS 26.4.1 + KakaoTalk for Mac 26.4.1 build 1181은 kakaocli auth --user-id, DB open, NTChatRoom / NTChatMessage query, attachment JSON parse, attachment URL 샘플 접근까지 통과했다. userId 자동탐색이 실패할 수 있으므로 필요하면 local userId를 명시해 auth를 먼저 실행한다.
 Windows KakaoTalk support는 research-only다.
 첨부파일 보존은 best-effort이며 URL 만료 전에 주기적으로 확인해야 한다.
 ```

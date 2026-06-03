@@ -5,7 +5,7 @@
 - KakaoTalk for Mac 설치 및 로그인.
 - 검증된 KakaoTalk for Mac 버전:
   - Intel Mac x86_64: `26.1.4` build `1163` full text/attachment baseline
-  - Apple Silicon arm64 + Apple M4: `26.4.1` build `1181` partial DB-open probe only
+  - Apple Silicon arm64 + Apple M4: `26.4.1` build `1181` text/attachment URL sample baseline
 - `kakaocli 0.4.1` 설치.
 - `kmsg 0.3.0` 설치. 단, archive source가 아니라 UI send/read 용도.
 - `~/.kakaocli/config.json`:
@@ -32,7 +32,7 @@
 kakaocli auth --user-id "$localUserId"
 ```
 
-이 단계는 DB 파일과 주요 테이블을 열 수 있는지만 확인합니다. 실제 메시지 아카이브 지원을 주장하려면 read-only query까지 통과해야 합니다.
+이 단계는 DB 파일과 주요 테이블을 열 수 있는지 확인합니다. 실제 메시지 아카이브 지원을 주장하려면 read-only query까지 통과해야 합니다.
 
 local config에서 `--db`, `--key` 값을 읽어 명시적으로 전달합니다. 두 값은 로그에 남기지 않습니다.
 
@@ -146,4 +146,4 @@ LaunchAgent는 다음을 지켜야 합니다.
 
 # English Summary
 
-Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 is currently partial: `auth --user-id` can open the DB and list key tables, but message query and fresh attachment URL download were not fully verified. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.
+Use `kakaocli 0.4.1` for read-only local DB inspection. The primary baseline is Intel Mac x86_64 with KakaoTalk for Mac 26.1.4 build 1163. Apple Silicon arm64 / Apple M4 with KakaoTalk for Mac 26.4.1 build 1181 was rechecked on 2026-06-03 through `auth --user-id`, message queries, attachment JSON parsing, and sampled attachment URL access. Use `kmsg 0.3.0` only for UI send/read automation. Run attachment checks every 1-3 hours for active rooms because fresh URLs may expire.
