@@ -1,51 +1,65 @@
-# AGENTS.md - Kakao PC Archive Skill Package
+# AGENTS.md - KakaoTalk Archive Skill Package
 
-This private repository documents a reusable OpenClaw/Codex skill for selected KakaoTalk PC archive collection.
+이 저장소는 선택한 KakaoTalk PC/Mac 채팅방의 텍스트와 첨부파일 메타데이터를 다루기 위한 OpenClaw/Codex skill 패키지다.
 
-## Role
+## 역할
 
-Agents using this repository should treat it as a local-first, privacy-sensitive archive workflow.
+이 저장소를 사용하는 agent는 local-first, privacy-sensitive archive workflow로 취급한다.
 
-Primary tasks:
+주요 작업:
 
-- Read selected KakaoTalk for Mac messages through local DB access.
-- Preserve attachment metadata and fresh downloadable media when possible.
-- Record KakaoTalk/client version assumptions before claiming support.
-- Keep raw chat data, media, DB files, keys, user IDs, and raw URLs out of git.
+- 선택한 KakaoTalk for Mac 채팅방 메시지를 로컬 DB에서 read-only로 확인한다.
+- 첨부파일 metadata와 fresh URL 다운로드 가능 여부를 기록한다.
+- KakaoTalk/client 버전을 기록한 뒤 지원 여부를 말한다.
+- raw chat data, media, DB files, keys, user IDs, raw URLs를 git에 넣지 않는다.
 
-## Startup
+## 시작 순서
 
-Before operating the workflow:
+작업 전 아래 파일을 읽는다.
 
-1. Read `README.md`.
-2. Read `SECURITY.md`.
-3. Read `skills/kakao-pc-archive/SKILL.md`.
-4. Read `skills/kakao-pc-archive/references/version-support.md`.
-5. Confirm the target chats are explicitly allowlisted.
+1. `README.md`
+2. `SECURITY.md`
+3. `docs/platform-support.md`
+4. `docs/text-data-check.md`
+5. `docs/attachment-collection.md`
+6. `skills/kakao-pc-archive/SKILL.md`
+7. `skills/kakao-pc-archive/references/version-support.md`
 
-## Hard Boundaries
+## 공개 저장소 기준
 
-- Do not ingest all chats by default.
-- Do not print SQLCipher keys, raw message bodies, raw attachment URLs, or full account-specific DB paths.
-- Do not commit local config, archive DBs, logs, or downloaded media.
-- Do not send KakaoTalk replies automatically unless the operator has explicitly approved that exact behavior.
-- Treat Windows support as unverified until a Windows adapter probe proves DB path, key derivation, schema, and attachment behavior.
+현재 저장소는 public으로 공개될 수 있다. 따라서 문서와 예시는 공개 가능한 수준으로만 작성한다.
 
-## Verified Support Statement
+- 실제 DB path, key, account hash를 쓰지 않는다.
+- 원문 메시지와 raw attachment URL을 쓰지 않는다.
+- 다운로드된 첨부파일을 커밋하지 않는다.
+- 동작 버전과 미검증 범위를 명확히 쓴다.
+- 공개 references는 URL만 남기고 private local note는 넣지 않는다.
 
-Use this wording unless newer evidence is recorded:
+## 금지 사항
+
+- 전체 채팅방 수집을 기본값으로 두지 않는다.
+- SQLCipher key, raw message body, raw attachment URL, full account-specific DB path를 출력하지 않는다.
+- local config, archive DB, logs, media output을 커밋하지 않는다.
+- 사용자가 명시적으로 승인하기 전까지 실제 카카오톡 메시지를 자동 전송하지 않는다.
+- Windows는 별도 probe 전까지 지원된다고 말하지 않는다.
+
+## 지원 문구
+
+새 검증 결과가 없으면 아래 문구를 사용한다.
 
 ```text
-macOS KakaoTalk collection is the verified path through kakaocli direct SQLCipher DB reads.
-Windows KakaoTalk support is planned/research-only.
-Attachment preservation is best-effort and freshness-sensitive.
+macOS 13.7.8 + KakaoTalk for Mac 26.1.4 + kakaocli direct SQLCipher DB read가 현재 검증 기준이다.
+Windows KakaoTalk support는 research-only다.
+첨부파일 보존은 best-effort이며 URL 만료 전에 주기적으로 확인해야 한다.
 ```
 
-## Release Checklist
+## 배포 전 체크
 
-Before pushing or sharing:
+1. `git status --short` 확인.
+2. `skills/kakao-pc-archive/references/github-private-distribution.md`의 secret scan 실행.
+3. public 상태에서 공개 가능한 내용만 stage했는지 확인.
+4. raw data, local config, media, DB 파일이 staging에 없는지 확인.
 
-1. Run `git status --short`.
-2. Run the secret scan pattern in `skills/kakao-pc-archive/references/github-private-distribution.md`.
-3. Confirm the repo is private.
-4. Invite collaborators with the minimum necessary permission.
+## English Summary
+
+Agents should treat this repository as a public-safe, local-first KakaoTalk archive skill package. Do not commit raw chats, DB files, SQLCipher keys, account-specific paths, raw attachment URLs, logs, or media.
